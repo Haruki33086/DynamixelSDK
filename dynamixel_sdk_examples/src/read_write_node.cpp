@@ -52,7 +52,9 @@
 
 // Default setting
 #define BAUDRATE 57600  // Default Baudrate of DYNAMIXEL X series
+// #define BAUDRATE 1000000 // lab dynamixel
 #define DEVICE_NAME "/dev/ttyACM0"  // [Linux]: "/dev/ttyUSB*", [Windows]: "COM*"
+// #define DEVICE_NAME "/dev/ttyUSB0" // lab dynamixel
 
 dynamixel::PortHandler * portHandler;
 dynamixel::PacketHandler * packetHandler;
@@ -118,7 +120,7 @@ ReadWriteNode::ReadWriteNode()
       // For AX & MX(1.0) use 2 byte data(uint16_t) for the Position Value.
       uint32_t goal_velocity = (unsigned int)msg->velocity;  // Convert int32 -> uint32
 
-      // Write Goal Position (length : 4 bytes)
+      // Write Goal Velocity (length : 4 bytes)
       // When writing 2 byte data to AX / MX(1.0), use write2ByteTxRx() instead.
       dxl_comm_result =
       packetHandler->write4ByteTxRx(
@@ -186,6 +188,21 @@ void setupDynamixel(uint8_t dxl_id)
     RCLCPP_ERROR(rclcpp::get_logger("read_write_node"), "Failed to set Position Control Mode.");
   } else {
     RCLCPP_INFO(rclcpp::get_logger("read_write_node"), "Succeeded to set Position Control Mode.");
+  }
+
+  // Use Velocity Control Mode おそらくpositionかvelocityのどちらかしか選択できない
+  dxl_comm_result = packetHandler->write1ByteTxRx(
+    portHandler,
+    dxl_id,
+    ADDR_OPERATING_MODE,
+    1,
+    &dxl_error
+  );
+
+  if (dxl_comm_result != COMM_SUCCESS) {
+    RCLCPP_ERROR(rclcpp::get_logger("read_write_node"), "Failed to set Velocity Control Mode.");
+  } else {
+    RCLCPP_INFO(rclcpp::get_logger("read_write_node"), "Succeeded to set Velocity Control Mode.");
   }
 
   // Enable Torque of DYNAMIXEL

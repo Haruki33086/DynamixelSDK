@@ -24,7 +24,7 @@
 #include "dynamixel_sdk/dynamixel_sdk.h"
 #include "dynamixel_sdk_custom_interfaces/msg/set_position.hpp"
 #include "dynamixel_sdk_custom_interfaces/srv/get_position.hpp"
-#include "dynamixel_sdk_custom_interfaces/msg/set_velocity.hpp"
+// #include "dynamixel_sdk_custom_interfaces/msg/set_velocity.hpp"
 
 
 class ReadWriteNode : public rclcpp::Node
@@ -32,7 +32,7 @@ class ReadWriteNode : public rclcpp::Node
 public:
   using SetPosition = dynamixel_sdk_custom_interfaces::msg::SetPosition;
   using GetPosition = dynamixel_sdk_custom_interfaces::srv::GetPosition;
-  using SetVelocity = dynamixel_sdk_custom_interfaces::msg::SetVelocity;
+  // using SetVelocity = dynamixel_sdk_custom_interfaces::msg::SetVelocity;
 
   ReadWriteNode();
   virtual ~ReadWriteNode();
@@ -40,7 +40,7 @@ public:
 private:
   rclcpp::Subscription<SetPosition>::SharedPtr set_position_subscriber_;
   rclcpp::Service<GetPosition>::SharedPtr get_position_server_;
-  rclcpp::Subscription<SetVelocity>::SharedPtr set_velocity_subscriber_;
+  // rclcpp::Subscription<SetVelocity>::SharedPtr set_velocity_subscriber_;
 
   int present_position;
 };

@@ -158,8 +158,8 @@ ReadWriteNode2::ReadWriteNode2()
       } else if (dxl_error != 0) {
         RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
       } else {
-        RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Velocity: %d]", left_motor_id, static_cast<int32_t>(twist->linear.x * 100));
-        RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Velocity: %d]", right_motor_id, static_cast<int32_t>(twist->linear.x * 100));
+        RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Velocity: %d]", left_motor_id, left_goal_velocity);
+        RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Velocity: %d]", right_motor_id, right_goal_velocity);
       }
     }
     );

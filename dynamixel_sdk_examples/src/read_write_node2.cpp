@@ -113,21 +113,43 @@ ReadWriteNode2::ReadWriteNode2()
     {
       uint8_t dxl_error = 0;
       // motor id // cmd_velだけじゃモーターのidがわからないので、ここで指定する
-      uint8_t motor_id = 0;
+      uint8_t left_motor_id = 0; // モーターのidを指定
+      uint8_t right_motor_id = 1; // モーターのidを指定
 
       // Position Value of X series is 4 byte data.
       // For AX & MX(1.0) use 2 byte data(uint16_t) for the Position Value.
 
-      int32_t goal_velocity = static_cast<int32_t>(twist->linear.x * 100);  // Convert int32 -> uint32
+      int32_t left_goal_velocity;
+      int32_t right_goal_velocity;
+
+      if ((twist->linear.x > 0) || (twist->linear.x < 0)) {
+        left_goal_velocity = static_cast<int32_t>(twist->linear.x * 100);  // Convert int32 -> uint32
+        right_goal_velocity = static_cast<int32_t>(twist->linear.x * 100);  // Convert int32 -> uint32
+      } else if ((twist->angular.z > 0) || (twist->angular.z < 0)) {
+        left_goal_velocity = static_cast<int32_t>(-twist->angular.z * 50);  // Convert int32 -> uint32
+        right_goal_velocity = static_cast<int32_t>(twist->angular.z * 50);  // Convert int32 -> uint32
+      } else {
+        left_goal_velocity = 0.0;
+        right_goal_velocity = 0.0;
+      }
 
       // Write Goal Velocity (length : 4 bytes)
       // When writing 2 byte data to AX / MX(1.0), use write2ByteTxRx() instead.
       dxl_comm_result =
       packetHandler->write4ByteTxRx(
         portHandler,
-        (uint8_t) motor_id,
+        (uint8_t) left_motor_id,
         ADDR_GOAL_VELOCITY,
-        goal_velocity,
+        left_goal_velocity,
+        &dxl_error
+      );
+
+      dxl_comm_result =
+      packetHandler->write4ByteTxRx(
+        portHandler,
+        (uint8_t) right_motor_id,
+        ADDR_GOAL_VELOCITY,
+        -right_goal_velocity,
         &dxl_error
       );
 
@@ -136,7 +158,8 @@ ReadWriteNode2::ReadWriteNode2()
       } else if (dxl_error != 0) {
         RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
       } else {
-        RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Velocity: %d]", motor_id, static_cast<int32_t>(twist->linear.x * 100));
+        RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Velocity: %d]", left_motor_id, static_cast<int32_t>(twist->linear.x * 100));
+        RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Velocity: %d]", right_motor_id, static_cast<int32_t>(twist->linear.x * 100));
       }
     }
     );

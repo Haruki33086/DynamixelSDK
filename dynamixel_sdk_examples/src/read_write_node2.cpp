@@ -30,9 +30,11 @@
 #include <cstdio>
 #include <memory>
 #include <string>
+#include <chrono>
 
 #include "dynamixel_sdk/dynamixel_sdk.h"
 #include "dynamixel_sdk_custom_interfaces/msg/set_velocity.hpp"
+#include "dynamixel_sdk_custom_interfaces/msg/get_velocity.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "rcutils/cmdline_parser.h"
@@ -44,6 +46,7 @@
 #define ADDR_TORQUE_ENABLE 64
 #define ADDR_LED 65
 #define ADDR_GOAL_VELOCITY 104
+#define ADDR_PRESENT_VELOCITY 128
 
 // Protocol version
 #define PROTOCOL_VERSION 2.0  // Default Protocol version of DYNAMIXEL X series.
@@ -163,6 +166,51 @@ ReadWriteNode2::ReadWriteNode2()
       }
     }
     );
+
+  get_velocity_publisher_ =
+    this->create_publisher<GetVelocity>(
+    "get_velocity",
+    QOS_RKL10V
+    );
+  timer_ = this->create_wall_timer(std::chrono::milliseconds{100}, std::bind(&ReadWriteNode2::timer_callback, this));
+}
+
+void ReadWriteNode2::timer_callback() // このように書かないといけないし、hppの方にも記述（private）←publicかどっちでもいいかも
+{
+  uint8_t dxl_error = 0;
+    uint8_t left_motor_id = 0; // モーターのidを指定
+    uint8_t right_motor_id = 1; // モーターのidを指定
+
+    // Read Present Velocity (length : 4 bytes)
+    // When reading 2 byte data from AX / MX(1.0), use read2ByteTxRx() instead.
+    int32_t left_present_velocity = 0;
+    int32_t right_present_velocity = 0;
+    dxl_comm_result =
+    packetHandler->read4ByteTxRx(
+      portHandler,
+      (uint8_t) left_motor_id,
+      ADDR_PRESENT_VELOCITY,
+      (uint32_t*)&left_present_velocity,
+      &dxl_error
+    );
+
+    dxl_comm_result =
+    packetHandler->read4ByteTxRx(
+      portHandler,
+      (uint8_t) right_motor_id,
+      ADDR_PRESENT_VELOCITY,
+      (uint32_t*)&right_present_velocity,
+      &dxl_error
+    );
+
+    auto msg = dynamixel_sdk_custom_interfaces::msg::GetVelocity();
+    msg.id = left_motor_id;
+    msg.velocity = left_present_velocity;
+    get_velocity_publisher_->publish(msg);
+
+    msg.id = right_motor_id;
+    msg.velocity = right_present_velocity;
+    get_velocity_publisher_->publish(msg);
 }
 
 ReadWriteNode2::~ReadWriteNode2()

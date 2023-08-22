@@ -24,11 +24,14 @@
 #include "dynamixel_sdk/dynamixel_sdk.h"
 #include "dynamixel_sdk_custom_interfaces/msg/set_velocity.hpp"
 #include "geometry_msgs/msg/twist.hpp"
+#include "dynamixel_sdk_custom_interfaces/msg/get_velocity.hpp"
 
 class ReadWriteNode2 : public rclcpp::Node
 {
 public:
   using SetVelocity = dynamixel_sdk_custom_interfaces::msg::SetVelocity;
+  using GetVelocity = dynamixel_sdk_custom_interfaces::msg::GetVelocity;
+  rclcpp::Publisher<GetVelocity>::SharedPtr get_velocity_publisher_; // privateでは外部からget_velocity_publisher_にアクセスできないのでpublicにする
 
   ReadWriteNode2();
   virtual ~ReadWriteNode2();
@@ -36,8 +39,10 @@ public:
 private:
   rclcpp::Subscription<SetVelocity>::SharedPtr set_velocity_subscriber_;
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_subscriber_;
+  rclcpp::TimerBase::SharedPtr timer_;
 
-  int present_position;
+  int present_velocity;
+  void timer_callback();
 };
 
 #endif  // READ_WRITE_NODE_HPP2_

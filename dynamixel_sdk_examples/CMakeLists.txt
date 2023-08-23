@@ -15,6 +15,11 @@ find_package(ament_cmake REQUIRED)
 find_package(dynamixel_sdk REQUIRED)
 find_package(dynamixel_sdk_custom_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
+# added by katayama
+find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 include_directories(include)
 
@@ -25,10 +30,32 @@ ament_target_dependencies(read_write_node
   dynamixel_sdk
   rclcpp
 )
+# added by katayama
+add_executable(read_write_node2 src/read_write_node2.cpp)
+ament_target_dependencies(read_write_node2
+  dynamixel_sdk_custom_interfaces
+  dynamixel_sdk
+  rclcpp
+  geometry_msgs
+)
+
+# added by katayama
+add_executable(publish_wheel_odometry src/publish_wheel_odometry.cpp)
+ament_target_dependencies(publish_wheel_odometry
+  dynamixel_sdk_custom_interfaces
+  dynamixel_sdk
+  rclcpp
+  geometry_msgs
+  nav_msgs
+  tf2
+  tf2_geometry_msgs
+)
 
 # Install
 install(TARGETS
   read_write_node
+  read_write_node2
+  publish_wheel_odometry
   DESTINATION lib/${PROJECT_NAME}
 )
 

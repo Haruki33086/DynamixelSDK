@@ -1,0 +1,100 @@
+<robot name="simple_mecanum_wheel">
+    
+    <link name="base_link">
+        <inertial>
+            <mass value="1"/>
+            <inertia ixx="100" ixy="0" ixz="0" iyy="100" iyz="0" izz="100" />
+            <!-- <origin/> -->
+        </inertial>
+    
+        <visual>
+            <origin xyz="0 0 .0775" />
+            <geometry>
+                <box size=".235 .175 .155" />
+            </geometry>
+            <material name="white">
+                <color rgba="1 1 1 1"/>
+            </material>
+        </visual>
+    
+        <collision>
+            <origin xyz="0 0 .0775" />
+            <geometry>
+                <box size=".235 .175 .155" />
+            </geometry>
+            <contact_coefficients mu="0" kp="1000.0" kd="1.0"/>
+        </collision>
+    </link>
+    
+    <link name="wheel0">
+        <visual>
+            <geometry>
+                <cylinder length="0.01" radius="0.035"/>
+            </geometry>
+            <origin xyz="0 0 0" rpy="1.57 0 0"/>
+            <material name="blue">
+                <color rgba="0 0 1 1"/>
+            </material>
+        </visual>
+    </link>
+    <link name="wheel2">
+        <visual>
+            <geometry>
+                <cylinder length="0.01" radius="0.035"/>
+            </geometry>
+            <origin xyz="0 0 0" rpy="1.57 0 0"/>
+            <material name="blue">
+                <color rgba="0 0 1 1"/>
+            </material>
+        </visual>
+    </link>
+    
+    <link name="lidar">
+        <visual>
+            <geometry>
+                <cylinder length="0.05" radius="0.035"/>
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <material name="green">
+                <color rgba="0 1 0 1"/>
+            </material>
+        </visual>
+    </link>
+
+    <link name="ball">
+        <visual>
+            <geometry>
+                <cylinder radius="0.025" length="0.05"/>    
+            </geometry>
+            <origin xyz="0.0 0.0 0.0" rpy="1.57 0.0 0.0"/>
+            <material name="red">
+                <color rgba="1 0 0 1"/>
+            </material>
+        </visual>
+    </link>
+    
+
+    <!-- joint -->
+    
+    <joint name="wheel0_connect" type="fixed">
+        <origin xyz=".0675 .1 .02" />
+        <parent link="base_link"/>
+        <child link="wheel0"/>
+    </joint>
+    <joint name="wheel2_connect" type="fixed">
+        <origin xyz=".0675 -.1 .02" />
+        <parent link="base_link"/>
+        <child link="wheel2"/>
+    </joint>
+    <joint name="lidar_connect" type="fixed">
+        <origin xyz=".0275 .0 .180" />
+        <parent link="base_link"/>
+        <child link="lidar"/>
+    </joint>
+    <joint name="ball_connect" type="fixed">
+        <origin xyz="-0.0925 .0 .01" />
+        <parent link="base_link"/>
+        <child link="ball"/>
+    </joint>
+    
+    </robot>

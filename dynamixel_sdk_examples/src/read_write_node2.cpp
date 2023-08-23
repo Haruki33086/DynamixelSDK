@@ -204,12 +204,8 @@ void ReadWriteNode2::timer_callback() // このように書かないといけな
     );
 
     auto msg = dynamixel_sdk_custom_interfaces::msg::GetVelocity();
-    msg.id = left_motor_id;
-    msg.velocity = left_present_velocity;
-    get_velocity_publisher_->publish(msg);
-
-    msg.id = right_motor_id;
-    msg.velocity = right_present_velocity;
+    msg.left_vel = left_present_velocity;
+    msg.right_vel = -right_present_velocity; // 右モーターは逆回転なので、-をつける
     get_velocity_publisher_->publish(msg);
 }
 

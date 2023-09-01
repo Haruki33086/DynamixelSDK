@@ -190,7 +190,7 @@ void ReadWriteNode2::timer_callback() // このように書かないといけな
       portHandler,
       (uint8_t) left_motor_id,
       ADDR_PRESENT_VELOCITY,
-      (uint32_t*)&left_present_velocity,
+      (uint32_t*)&left_present_velocity, // decimal値
       &dxl_error
     );
 
@@ -204,9 +204,11 @@ void ReadWriteNode2::timer_callback() // このように書かないといけな
     );
 
     auto msg = dynamixel_sdk_custom_interfaces::msg::GetVelocity();
-    msg.left_vel = left_present_velocity;
-    msg.right_vel = -right_present_velocity; // 右モーターは逆回転なので、-をつける
+    msg.left_vel = left_present_velocity * 0.229; // 1decimal = around 0.229rpm
+    msg.right_vel = -right_present_velocity * 0.229; // 右モーターは逆回転なので、-をつける
     get_velocity_publisher_->publish(msg);
+
+    // RCLCPP_INFO(this->get_logger(), "Left Present Velocity: %d", left_present_velocity);
 }
 
 ReadWriteNode2::~ReadWriteNode2()

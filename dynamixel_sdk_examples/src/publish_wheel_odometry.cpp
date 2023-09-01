@@ -3,13 +3,15 @@
 #include "dynamixel_sdk_custom_interfaces/msg/get_velocity.hpp"
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+#include <tf2_ros/transform_broadcaster.h>
+#include "geometry_msgs/msg/transform_stamped.hpp"
 #include <cmath>
 
 #include "publish_wheel_odometry.hpp"
 
 // Default setting
-#define WHEEL_RADIUS 0.035  // Replace with actual value [m]
-#define WHEEL_BASE 0.2    // Replace with actual value [m]
+#define WHEEL_RADIUS 0.03  // Replace with actual value [m]
+#define WHEEL_BASE 0.165  // Replace with actual value [m]
 
 PublishWheelOdometry::PublishWheelOdometry()
 : Node("publish_wheel_odometry")
@@ -34,8 +36,8 @@ PublishWheelOdometry::PublishWheelOdometry()
       float left_velocity = 0.0f;
       float right_velocity = 0.0f;
       
-      left_velocity = msg->left_vel; // Left wheel velocity
-      right_velocity = msg->right_vel; // Right wheel velocity
+      left_velocity = msg->left_vel; // Left wheel velocity [rpm]
+      right_velocity = msg->right_vel; // Right wheel velocity [rpm]
 
       // Convert rpm to m/s using wheel radius
       double left_speed_mps = (left_velocity * WHEEL_RADIUS * 2 * M_PI) / 60; // Convert rpm to rad/s
@@ -73,6 +75,19 @@ PublishWheelOdometry::PublishWheelOdometry()
       odometry_publisher_->publish(odom);
 
       last_time_ = current_time;
+
+      tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
+      // Inside the velocity_callback function
+      geometry_msgs::msg::TransformStamped odom_tf;
+      odom_tf.header.stamp = this->now();
+      odom_tf.header.frame_id = "odom";
+      odom_tf.child_frame_id = "base_link";
+      odom_tf.transform.translation.x = x_;
+      odom_tf.transform.translation.y = y_;
+      odom_tf.transform.translation.z = 0.0;
+      odom_tf.transform.rotation = tf2::toMsg(quaternion);
+
+      tf_broadcaster_->sendTransform(odom_tf); // .じゃなくて->
     }
   );
 }
